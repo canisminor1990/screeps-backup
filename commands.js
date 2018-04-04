@@ -1,4 +1,8 @@
 // useful commands
+Game.rooms['E8N45'].placeReactionOrder('5ab60ab4c107f9746ab273c4', 'OH', '20000');
+Game.rooms['E9N47'].placeReactionOrder('5ab7018a26ac6137d696e4b5', 'UL', '20000');
+Game.rooms['E12N42'].placeReactionOrder('5ab75f4cbb8cac1dafc367d5', 'ZK', '20000');
+Game.rooms['E3N38'].placeReactionOrder('5ab9ad7712f38b0f500aeaf5', 'G', '20000');
 
 // Recycle a creep
 Creep.action.recycling.assign(Game.creeps['<creepName>']);
