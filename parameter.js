@@ -5,7 +5,7 @@ let mod = {
 	HONK: true, // HONK when stored path is blocked by other creeps
 	OOPS: true, // Creeps say Oops when dropping energy during dropmining
 	SAY_ASSIGNMENT: true, // say a symbol representing the assiged action
-	SAY_PUBLIC: true, // creeps talk public
+	SAY_PUBLIC: false, // creeps talk public
 	DEBUG: false, // gimme some more details, use false not undefined to unset
 	DEBUG_STACKS: false, // add stack frame to EVERY console.log message (spammy!)
 	TRACE: false, // use Memory.debugTrace for low-level information
@@ -35,14 +35,14 @@ let mod = {
 	CENSUS_ANNOUNCEMENTS: true, // log birth and death
 	SELL_NOTIFICATION: true, // send mail when selling minerals
 	SPAWN_INTERVAL: 5, // loops between regular spawn probe
-	ROOM_VISUALS: false, // display basic room statistics with RoomVisuals
+	ROOM_VISUALS: true, // display basic room statistics with RoomVisuals
 	ROOM_VISUALS_ALL: false, // displays visuals in all rooms you have vision in. Only your rooms when false.
 	VISUALS: { // if ROOM_VISUALS is enabled, you can select what you want to display - All is a bit much for some people.
 		VISIBLE_ONLY: false, // depends on userscript: https://github.com/Esryok/screeps-browser-ext/blob/master/visible-room-tracker.user.js
-		ROOM: true, // displays basic info relative to the room
-		ROOM_GLOBAL: true, // displays basic info relative to your account - requires ROOM: true
+		ROOM: false, // displays basic info relative to the room
+		ROOM_GLOBAL: false, // displays basic info relative to your account - requires ROOM: true
 		INFO_PIE_CHART: false, // replaces the info bars with pie charts
-		CPU: true, // display a graph containing CPU used, CPU limit, and bucket
+		CPU: false, // display a graph containing CPU used, CPU limit, and bucket
 		ROOM_ORDERS: true, // display orders the room creates
 		ROOM_OFFERS: true, // display what a room will offer another
 		SPAWN: true, // displays creep name and spawn progress percentage when spawning
