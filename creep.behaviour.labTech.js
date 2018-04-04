@@ -10,10 +10,10 @@ mod.inflowActions = (creep) => {
 };
 mod.outflowActions = (creep) => {
     let priority = [
+        Creep.action.storing,
         Creep.action.charging,
         Creep.action.feeding,
-        Creep.action.fueling,
-        Creep.action.storing
+        Creep.action.fueling
     ];
     if ( creep.sum > creep.carry.energy ||
             ( !creep.room.situation.invasion &&

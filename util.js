@@ -1,8 +1,6 @@
 // All methods require a JSDoc comment describing it.
 // http://usejsdoc.org/
 module.exports = {
-
-
     
     /**
      * Gets currently visible rooms.

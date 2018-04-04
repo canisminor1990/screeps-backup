@@ -257,10 +257,12 @@ let mod = {
 	// make boostProduction on/off
 	MAKE_COMPOUNDS: false,
 	// checks the rooms in this interval to make compounds
-	MAKE_COMPOUNDS_INTERVAL: 1,
+	MAKE_COMPOUNDS_INTERVAL: 5,
+	MAKE_REACTIONS_WITH_3LABS: false,
 	CHECK_ORDERS_INTERVAL: 50,
 	PURCHASE_MINERALS: false,
-	// the process starts if MAKE_COMPOUNDS = true, compound amount in a room is below COMPOUNDS_TO_MAKE[compound].threshold, and stops when reaches COMPOUNDS_TO_MAKE[compound].amount
+	STORE_CHARGE_PURCHASE: 0.9,
+	// the process starts when MAKE_COMPOUNDS = true, compound amount in a room is below COMPOUNDS_TO_MAKE[compound].threshold, and stops when reaches COMPOUNDS_TO_MAKE[compound].amount
 	COMPOUNDS_TO_MAKE: {    // which compounds to make
 		G: {                // for nukes
 			make: false,    // make it or not
@@ -333,6 +335,7 @@ let mod = {
 	MIN_OFFER_AMOUNT: 100,
 	MIN_COMPOUND_AMOUNT_TO_MAKE: 3000,
 	ALLOCATE_COMPOUNDS: false,
-	COMPOUNDS_TO_ALLOCATE: {},
+	COMPOUNDS_TO_ALLOCATE: {}
+
 };
 module.exports = mod;
