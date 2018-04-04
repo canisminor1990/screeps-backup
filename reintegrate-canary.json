@@ -1,0 +1,23 @@
+{
+  "internal": {
+    "reset": "upstream/dev",
+    "merge": [
+      "upstream/feature/actionRenewing",
+      "upstream/feature/portal",
+      "upstream/feature/improvedTrain"
+    ]
+  },
+  "public": {
+    "reset": "upstream/dev",
+    "merge": [
+      "upstream/change/switchRamparts",
+      "upstream/cooldown",
+      "upstream/hotfix/Robbers",
+      "upstream/visuals",
+      "upstream/hotfix/improvedLeaveBorder",
+      "upstream/hotfix/spawnCreep",
+      "upstream/WIP/AutomatedBoostProduction"
+    ]
+  }
+}
+
