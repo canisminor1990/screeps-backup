@@ -181,9 +181,9 @@ let mod = {
     REMOTE_HAULER: {
         ALLOW_OVER_CAPACITY: 2450, // Hauler capacity rounds up by MIN_WEIGHT, or this number value.
         DRIVE_BY_BUILD_ALL: false, // If REMOTE_HAULER.DRIVE_BY_BUILDING is enabled then this option will allow remote haulers will drive-by-build any of your structures.
-        DRIVE_BY_BUILD_RANGE: 1, // A creep's max build distance is 3 but cpu can be saved by dropping the search distance to 1.
+        DRIVE_BY_BUILD_RANGE: 2, // A creep's max build distance is 3 but cpu can be saved by dropping the search distance to 1.
         DRIVE_BY_BUILDING: true, // Allows remote haulers to build roads and containers. Consider setting REMOTE_WORKER_MULTIPLIER to 0.
-        DRIVE_BY_REPAIR_RANGE: 0, // range that remote haulers should search when trying to repair and move
+        DRIVE_BY_REPAIR_RANGE: 2, // range that remote haulers should search when trying to repair and move
         MIN_LOAD: 0.75, // Haulers will return home as long as their ratio of carrying/capacity is above this amount.
         MIN_WEIGHT: 800, // Small haulers are a CPU drain.
         MULTIPLIER: 4, // Max number of haulers spawned per source in a remote mining room.
