@@ -297,8 +297,8 @@ mod.extend = function() {
 
         if (roomTradeUpdate) {
             boostTiming.roomState = 'ordersPlaced';
-            Memory.boostTiming.roomTrading.boostProduction = true;
-            Memory.boostTiming.timeStamp = Game.time;
+            //Memory.boostTiming.roomTrading.boostProduction = true;
+            //Memory.boostTiming.timeStamp = Game.time;
             this.GCOrders();
         } else if (labOrderPlaced) {
             boostTiming.roomState = 'ordersPlaced';

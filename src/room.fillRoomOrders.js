@@ -6,14 +6,16 @@ let mod = {
     },
     fillRoomOrders() {
 
+        if (!global.MAKE_COMPOUNDS && !global.ALLOCATE_COMPOUNDS)
+            return;
+
         if (_.isUndefined(Memory.boostTiming))
             Memory.boostTiming = {};
 
         if (_.isUndefined(Memory.boostTiming.roomTrading)) {
             Memory.boostTiming.roomTrading = {
                 boostProduction: false,
-                boostAllocation: false,
-                reallocating: false
+                boostAllocation: false
             };
         }
 
@@ -47,14 +49,17 @@ let mod = {
             if (roomTrading.reallocating)
                 roomTradingType = `REALLOCATING since: ${Game.time - Memory.boostTiming.timeStamp}`;
 
-            global.logSystem(room.name, `orderingRoom.name: ${room.name}, checkRoomAt: ${(room.memory.resources.boostTiming.checkRoomAt || 0) - Game.time} ${roomTradingType}`);
+            if (!Memory.boostTiming.multiOrderingRoomName)
+                global.logSystem(room.name, `orderingRoom.name: ${room.name}, checkRoomAt: ${(room.memory.resources.boostTiming.checkRoomAt || 0) - Game.time} ${roomTradingType}`);
+            else
+                global.logSystem(room.name, `multi ordering in progress at ${Memory.boostTiming.multiOrderingRoomName}`);
 
         } else if (numberOfOrderingRooms > 1) {
             console.log(`WARNING: ${numberOfOrderingRooms} ordering rooms!`);
             global.BB(orderingRoom);
         }
 
-        if (orderingRoom.length === 1 && Game.time >= orderingRoom[0].memory.resources.boostTiming.checkRoomAt) {
+        if (orderingRoom.length === 1 && Game.time >= orderingRoom[0].memory.resources.boostTiming.checkRoomAt && !Memory.boostTiming.multiOrderingRoomName) {
             let room = orderingRoom[0],
                 data = room.memory.resources,
                 ordersWithOffers = room.ordersWithOffers();
@@ -62,9 +67,6 @@ let mod = {
             if (ordersWithOffers) {
                 let returnValue = room.checkOffers();
                 global.logSystem(room.name, `checkOffers running from ${room.name} returnValue: ${returnValue}`);
-                // TODO is it needed?
-                if (returnValue && Memory.boostTiming.roomTrading.boostAllocation && (data.orders.length === 0 || _.sum(data.orders, 'amount') === 0))
-                    data.boostTiming = {};
             } else {
                 global.logSystem(room.name, `${room.name} no offers found, updating offers`);
                 room.GCOrders();
@@ -77,19 +79,13 @@ let mod = {
             if (roomTrading.boostProduction === true && !reactionPlacedRoom) {
                 roomTrading.boostProduction = false;
                 Memory.boostTiming.timeStamp = Game.time;
-            } else if (roomTrading.boostProduction === false && reactionPlacedRoom) {
-                roomTrading.boostProduction = true;
-                Memory.boostTiming.timeStamp = Game.time;
             } else if (roomTrading.boostAllocation === true) {
                 roomTrading.boostAllocation = false;
-                Memory.boostTiming.timeStamp = Game.time;
-            } else if (roomTrading.reallocating === true) {
-                roomTrading.reallocating = false;
                 Memory.boostTiming.timeStamp = Game.time;
             }
 
             console.log(`FLAGS:`);
-            console.log(`boostProduction: ${roomTrading.boostProduction} boostAllocation: ${roomTrading.boostAllocation} reallocating: ${roomTrading.reallocating}`);
+            console.log(`boostProduction: ${roomTrading.boostProduction} boostAllocation: ${roomTrading.boostAllocation}`);
             console.log(`since: ${Game.time - Memory.boostTiming.timeStamp}`);
 
         }
@@ -118,27 +114,28 @@ let mod = {
                     currentRoom = Game.rooms[candidate.room];
 
                 if (candidate.readyOffers > 0) {
+
+                    if (currentRoom.terminal.cooldown > 0) {
+                        global.logSystem(currentRoom.name, `${currentRoom.name} terminal.cooldown: ${currentRoom.terminal.cooldown} fillARoomOrder() delayed.`);
+                        candidates.time = Game.time + currentRoom.terminal.cooldown;
+                    } else
+                        candidates.time = Game.time + 1;
+
                     global.logSystem(memoryOrderingRoom.name, `running ${candidate.room} fillARoomOrder() in a row, time: ${Game.time} readyOffers: ${candidate.readyOffers}`);
                     returnValue = currentRoom.fillARoomOrder();
 
                     if (returnValue === true) {
                         candidate.readyOffers--;
                         if (candidate.readyOffers >= 1) {
-                            candidates.time = Game.time + TERMINAL_COOLDOWN;
-                            data.boostTiming.checkRoomAt = Game.time + TERMINAL_COOLDOWN + _.sum(candidates, 'readyOffers') + 1;
                             global.logSystem(candidate.room, `has ${candidate.readyOffers} remains fillRoomOrders check room at: ${data.boostTiming.checkRoomAt} readyOffers: ${candidate.readyOffers}`);
                         } else {
                             global.logSystem(memoryOrderingRoom.name, `offers from ${candidate.room} are completed`);
                             orderCandidates.splice(i, 1);
                             i--;
-                            data.boostTiming.checkRoomAt = Game.time + _.sum(candidates, 'readyOffers') + 1;
-                            candidates.time = Game.time + 1;
                         }
-                        //return;
                     } else if (returnValue === ERR_TIRED) {
                         candidates.time = Game.time + currentRoom.terminal.cooldown;
-                        data.boostTiming.checkRoomAt = Game.time + currentRoom.terminal.cooldown + 2;
-                        global.logSystem(candidate.room, `${candidate.room} offers from ${candidate.room} failed send to ${memoryOrderingRoom.name}.  Terminal.cooldown: ${currentRoom.terminal.cooldown} fillRoomOrders check room at: ${data.boostTiming.checkRoomAt}`);
+                        global.logSystem(candidate.room, `${candidate.room} offers from ${candidate.room} failed send to ${memoryOrderingRoom.name}.  Terminal.cooldown: ${currentRoom.terminal.cooldown}`);
                     } else if (returnValue === ERR_NOT_ENOUGH_RESOURCES) {
                         global.logSystem(memoryOrderingRoom.name, `WARNING: offers from ${candidate.room} are not completed: not enough resources`);
                         orderCandidates.splice(i, 1);
@@ -150,7 +147,7 @@ let mod = {
                     }
                 } else {
                     data.boostTiming.checkRoomAt = Game.time + 1;
-                    global.logSystem(memoryOrderingRoom.name, `offers from ${candidate.room} are completed`);
+                    global.logSystem(memoryOrderingRoom.name, `offers from ${candidate.room} are completed OUTSIDE`);
                     orderCandidates.splice(i, 1);
                     i--;
                 }

@@ -6,13 +6,16 @@ let mod = {
     },
     boostProduction() {
 
+        if (!global.MAKE_COMPOUNDS)
+            return;
+
         let roomTrading = Memory.boostTiming.roomTrading;
 
         if (roomTrading.boostAllocation || roomTrading.reallocating)
             return;
 
         // make compounds
-        if (global.MAKE_COMPOUNDS && Game.time % global.MAKE_COMPOUNDS_INTERVAL === 0) {
+        if (Game.time % global.MAKE_COMPOUNDS_INTERVAL === 0) {
 
             let myRooms = _.filter(Game.rooms, {'my': true}),
                 orderingRoom = global.orderingRoom(),
@@ -52,6 +55,7 @@ let mod = {
                         if (reactionMaking) {
                             boostTiming.roomState = 'reactionMaking';
                             boostTiming.checkRoomAt = Game.time;
+                            delete boostTiming.getOfferAttempts;
                             global.logSystem(room.name, `${room.name} orders done.`);
                         }
                     }
@@ -85,10 +89,11 @@ let mod = {
 
                     if (labResourcesA === reactionAmount && labResourcesB === reactionAmount) {
                         global.logSystem(room.name, `lab orders OK`);
-                        if (_.isUndefined(room.resourcesAll[component_a]) || _.isUndefined(room.resourcesAll[component_a])) {
-                            global.logSystem(room.name, `resources NOT OK`);
-                            global.logSystem(room.name, `reactionOrders fixed`);
+                        if (_.isUndefined(resourcesA) || _.isUndefined(resourcesB)) {
                             data.reactions.orders[0].amount = 0;
+                            global.logSystem(room.name, `resources NOT OK`);
+                            global.logSystem(room.name, `resourcesA: ${resourcesA} resourcesB: ${resourcesB}`);
+                            global.logSystem(room.name, `reactionOrders deleted`);
                         }
                     }
                     else if (reactionAmount > labResourcesA || reactionAmount > labResourcesB) {
@@ -96,21 +101,20 @@ let mod = {
                         global.logSystem(room.name, `${room.name} reactionAmount: ${reactionAmount} DIFF: labA: ${labResourcesA - reactionAmount} labB: ${labResourcesB - reactionAmount}`);
                         let minAmount = Math.min(labResourcesA, labResourcesB);
                         if (minAmount >= LAB_REACTION_AMOUNT)
-                            data.reactions.orders[0].amount = Math.min(labResourcesA, labResourcesB);
+                            data.reactions.orders[0].amount = minAmount;
                         else
                             data.reactions.orders[0].amount = 0;
-                        global.logSystem(room.name, `reactionOrders fixed`);
+                        global.logSystem(room.name, `reactionOrders fixed: ${data.reactions.orders[0].amount}`);
                     } else if (reactionAmount < labResourcesA || reactionAmount < labResourcesB) {
                         global.logSystem(room.name, `TOO MUCH lab orders:`);
                         global.logSystem(room.name, `${room.name} reactionAmount: ${reactionAmount} DIFF: labA: ${labResourcesA - reactionAmount} labB: ${labResourcesB - reactionAmount}`);
-                        data.reactions.orders[0].amount = Math.min(labResourcesA, labResourcesB);
-                        global.logSystem(room.name, `reactionOrders fixed`);
+                        let minAmount = Math.min(labResourcesA, labResourcesB);
+                        if (minAmount >= LAB_REACTION_AMOUNT)
+                            data.reactions.orders[0].amount = minAmount;
+                        else
+                            data.reactions.orders[0].amount = 0;
+                        global.logSystem(room.name, `reactionOrders fixed: ${data.reactions.orders[0].amount}`);
                     }
-
-                    if (!_.isUndefined(resourcesA) && resourcesA < 0)
-                        global.logSystem(room.name, `there is ${resourcesA} ${component_a} NOT enough resources`);
-                    else if (!_.isUndefined(resourcesB) && resourcesB < 0)
-                        global.logSystem(room.name, `there is ${resourcesB} ${component_b} NOT enough resources`);
                 }
 
                 if (Game.time >= boostTiming.checkRoomAt) {

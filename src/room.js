@@ -976,10 +976,15 @@ mod.extend = function(){
 
 
         if (!this.ordersWithOffers()) {
+
             if (global.DEBUG) {
                 global.logSystem(this.name, `not enough or no offers found. Updating room orders in room ${this.name}`);
-                //global.BB(this.memory.resources.orders);
             }
+            // TODO test it
+            if (_.isUndefined(data.boostTiming.getOfferAttempts))
+                data.boostTiming.getOfferAttempts = 0;
+            else
+                data.boostTiming.getOfferAttempts++;
 
             // GCAllRoomOffers
             global.logSystem(this.name, `${this.name} running GCAllRoomOffers`);
@@ -1010,11 +1015,18 @@ mod.extend = function(){
                     }
                 }
             }
-
-            this.updateRoomOrders();
-            data.boostTiming.ordersPlaced = Game.time;
-            data.boostTiming.checkRoomAt = Game.time + 1;
-            return true;
+            // TODO test it
+            if (data.boostTiming.getOfferAttempts < 3) {
+                this.updateRoomOrders();
+                data.boostTiming.ordersPlaced = Game.time;
+                data.boostTiming.checkRoomAt = Game.time + 1;
+                return true;
+            }
+            else {
+                data.orders = [];
+                data.reactions.orders[0].amount = 0;
+                delete data.boostTiming.getOfferAttempts;
+            }
         } else {
             data.boostTiming.checkRoomAt = Game.time + global.CHECK_ORDERS_INTERVAL;
             return false;

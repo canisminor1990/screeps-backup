@@ -668,7 +668,6 @@ module.exports = {
                         data.reactions.orders = [];
 
                     if (data.lab) {
-
                         data.lab = [];
                         _.values(Game.structures).filter(i => i.structureType === 'lab').map(i => i.room.setStore(i.id, RESOURCE_ENERGY, 2000));
                     }
@@ -677,8 +676,8 @@ module.exports = {
                     console.log(`${room.name} has no memory.resources`);
             }
         }
-
-        delete Memory.boostTiming;
+        if (roomName === undefined)
+            delete Memory.boostTiming;
 
     }
 };

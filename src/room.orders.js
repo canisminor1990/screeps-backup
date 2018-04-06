@@ -550,7 +550,7 @@ mod.extend = function() {
             let requiresEnergy = room => (
                 room.my && room.storage && room.terminal &&
                 room.terminal.sum < room.terminal.storeCapacity - ENERGY_BALANCE_TRANSFER_AMOUNT &&
-                room.storage.sum < room.storage.storeCapacity * 0.6 &&
+                room.storage.sum < room.storage.storeCapacity * TARGET_STORAGE_SUM_RATIO &&
                 !room._isReceivingEnergy &&
                 room.storage.store[RESOURCE_ENERGY] < MAX_STORAGE_ENERGY[room.controller.level]
             )
@@ -562,7 +562,7 @@ mod.extend = function() {
                 transacting = response == OK;
             }
         }
-        if ( !transacting && Memory.boostTiming && Memory.boostTiming.roomTrading.boostProduction) {
+        if ( !transacting && !Memory.boostTiming) {
             transacting = this.fillARoomOrder();
             if (transacting !== true)
                 transacting = false;

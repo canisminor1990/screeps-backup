@@ -1,4 +1,3 @@
-// TODO collect all the labs not just one when emptying
 let action = new Creep.Action('reallocating');
 module.exports = action;
 action.maxPerTarget = 1;
@@ -95,7 +94,6 @@ action.newTargetLab = function(creep) {
         for (var i=0;i<data.labs.length;i++) {
             let d = data.labs[i];
             let lab = Game.getObjectById(d.id);
-            let roomTrading = Memory.boostTiming.roomTrading;
             if (!lab) continue;
             var amount = 0;
             if (lab.mineralAmount > 0) {
@@ -129,38 +127,10 @@ action.newTargetLab = function(creep) {
                         creep.data.reallocating = lab.mineralType;
                         return ret.structure;
                     }
-                    if (ROOM_TRADING && ((roomTrading && roomTrading.boostProduction === false && roomTrading.boostAllocation === false) || !roomTrading)
-                        && !(lab.mineralType == RESOURCE_ENERGY || lab.mineralType == room.mineralType)) {
-
-                        const orderCreated = _.some(room.memory.resources.orders, order => {
-                            return (order.type === lab.mineralType && order.amount > 0) || (room.resourcesAll[order.type] || 0) + (room.resourcesReactions || 0) >= order.amount;
-                        });
-
-
-                        // TODO check room.resourcesAll
-                        if(!orderCreated) {
-
-                            global.logSystem(room.name, `${room.name} needs additional room order ${amount} ${lab.mineralType}`);
-
-                            let orderAmount;
-                            if (amount < global.MIN_OFFER_AMOUNT)
-                                orderAmount = global.MIN_OFFER_AMOUNT;
-                            else
-                                orderAmount = amount;
-
-
-                            room.placeRoomOrder(lab.id, lab.mineralType, orderAmount);
-
-                            let boostTiming = room.memory.resources.boostTiming;
-                            Memory.boostTiming.roomTrading.reallocating = true;
-                            Memory.boostTiming.timeStamp = Game.time;
-                            if (boostTiming) {
-                                boostTiming.roomState = 'ordersPlaced';
-                                room.GCOrders();
-                            }
-                        }
+                    if (ROOM_TRADING && !global.MAKE_COMPOUNDS && !global.ALLOCATE_COMPOUNDS && !(lab.mineralType == RESOURCE_ENERGY || lab.mineralType == room.mineralType)) {
+                        const orderCreated = _.some(room.memory.resources.orders, {'type':lab.mineralType});
+                        if(!orderCreated) room.placeRoomOrder(lab.id,lab.mineralType,amount);
                     }
-
                 }
             } else {
                 // lab is empty so check and fill order
@@ -187,36 +157,10 @@ action.newTargetLab = function(creep) {
                         creep.data.reallocating = resourceType;
                         return ret.structure;
                     }
-
-                    if (ROOM_TRADING && ((roomTrading && roomTrading.boostProduction === false && roomTrading.boostAllocation === false) || !roomTrading)
-                        && !(resourceType === RESOURCE_ENERGY || resourceType === room.mineralType)) {
-                        const orderCreated = _.some(room.memory.resources.orders, order => {
-                            return (order.type === lab.mineralType && order.amount > 0) || (room.resourcesAll[order.type] || 0) + (room.resourcesReactions || 0) >= order.amount;
-                        });
-
-                        // TODO check room.resourcesAll
-                        if(!orderCreated) {
-
-                            global.logSystem(room.name, `${room.name} needs additional room order ${order.orderRemaining} ${resourceType}`);
-
-                            let orderAmount;
-                            if (order.orderRemaining < global.MIN_OFFER_AMOUNT)
-                                orderAmount = global.MIN_OFFER_AMOUNT;
-                            else
-                                orderAmount = order.orderRemaining;
-
-                            room.placeRoomOrder(lab.id, resourceType, orderAmount);
-
-                            let boostTiming = room.memory.resources.boostTiming;
-                            Memory.boostTiming.roomTrading.reallocating = true;
-                            Memory.boostTiming.timeStamp = Game.time;
-                            if (boostTiming) {
-                                boostTiming.roomState = 'ordersPlaced';
-                                room.GCOrders();
-                            }
-                        }
+                    if (ROOM_TRADING && !global.MAKE_COMPOUNDS && !global.ALLOCATE_COMPOUNDS && !(resourceType == RESOURCE_ENERGY || resourceType == room.mineralType)) {
+                        const orderCreated = _.some(room.memory.resources.orders, {'type':lab.mineralType});
+                        if(!orderCreated) room.placeRoomOrder(lab.id,resourceType,order.orderRemaining);
                     }
-
                 }
             }
             amount = lab.getNeeds(RESOURCE_ENERGY);
