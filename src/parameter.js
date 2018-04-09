@@ -221,7 +221,7 @@ let mod = {
 		GUARDING: String.fromCodePoint(0x1F6E1), // 🛡
 		HARVESTING: String.fromCodePoint(0x26CF), // ⛏
 		HEALING: String.fromCodePoint(0x1F48A), // 💊
-		IDLE: String.fromCodePoint(0x1F6AC), // 🚬
+		IDLE: String.fromCodePoint(0x1F3B5), // 🎵
 		INVADING: String.fromCodePoint(0x1F52B), // 🔫
 		MINING: String.fromCodePoint(0x26CF), // ⛏
 		PICKING: String.fromCodePoint(0x1F9E4), // 🧤
