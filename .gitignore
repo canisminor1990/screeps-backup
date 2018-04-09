@@ -1,5 +1,7 @@
 /backup
 /public
+*.md
+*.txt
 
 ### ignore individual custom module overrides
 custom.*
