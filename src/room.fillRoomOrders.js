@@ -46,8 +46,6 @@ let mod = {
                 roomTradingType = `BOOST_PRODUCTION since: ${Game.time - Memory.boostTiming.timeStamp}`;
             if (roomTrading.boostAllocation)
                 roomTradingType = `BOOST_ALLOCATION since: ${Game.time - Memory.boostTiming.timeStamp}`;
-            if (roomTrading.reallocating)
-                roomTradingType = `REALLOCATING since: ${Game.time - Memory.boostTiming.timeStamp}`;
 
             if (!Memory.boostTiming.multiOrderingRoomName)
                 global.logSystem(room.name, `orderingRoom.name: ${room.name}, checkRoomAt: ${(room.memory.resources.boostTiming.checkRoomAt || 0) - Game.time} ${roomTradingType}`);
@@ -103,6 +101,7 @@ let mod = {
 
             if (orderCandidates.length === 0) {
                 global.logSystem(memoryOrderingRoom.name, `all ready offers completed to ${Memory.boostTiming.multiOrderingRoomName} Memory.boostTiming.multiOrderingRoomName deleted.`);
+                Game.rooms[Memory.boostTiming.multiOrderingRoomName].memory.resources.boostTiming.checkRoomAt = Game.time + global.CHECK_ORDERS_INTERVAL;
                 delete Memory.boostTiming.multiOrderingRoomName;
                 delete memoryOrderingRoom.memory.resources.boostTiming.ordersReady;
                 return;
@@ -118,6 +117,7 @@ let mod = {
                     if (currentRoom.terminal.cooldown > 0) {
                         global.logSystem(currentRoom.name, `${currentRoom.name} terminal.cooldown: ${currentRoom.terminal.cooldown} fillARoomOrder() delayed.`);
                         candidates.time = Game.time + currentRoom.terminal.cooldown;
+                        continue;
                     } else
                         candidates.time = Game.time + 1;
 
@@ -127,7 +127,7 @@ let mod = {
                     if (returnValue === true) {
                         candidate.readyOffers--;
                         if (candidate.readyOffers >= 1) {
-                            global.logSystem(candidate.room, `has ${candidate.readyOffers} remains fillRoomOrders check room at: ${data.boostTiming.checkRoomAt} readyOffers: ${candidate.readyOffers}`);
+                            global.logSystem(candidate.room, `has ${candidate.readyOffers} remains fillRoomOrders check. readyOffers: ${candidate.readyOffers}`);
                         } else {
                             global.logSystem(memoryOrderingRoom.name, `offers from ${candidate.room} are completed`);
                             orderCandidates.splice(i, 1);
@@ -145,11 +145,6 @@ let mod = {
                         orderCandidates.splice(i, 1);
                         i--;
                     }
-                } else {
-                    data.boostTiming.checkRoomAt = Game.time + 1;
-                    global.logSystem(memoryOrderingRoom.name, `offers from ${candidate.room} are completed OUTSIDE`);
-                    orderCandidates.splice(i, 1);
-                    i--;
                 }
             }
         }

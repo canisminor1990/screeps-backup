@@ -1,6 +1,3 @@
-/backup
-/public
-
 ### ignore individual custom module overrides
 custom.*
 custom/*

@@ -247,8 +247,7 @@ global.install = () => {
             spawns: load("room.spawn"),
             towers: load("room.tower"),
             fillRoomOrders: load("room.fillRoomOrders"),
-            boostProduction: load('room.boostProduction'),          
-            boostAllocation: load("room.boostAllocation")
+            boostProduction: load("room.boostProduction"),
         },
     });
     global.inject(Spawn, load("spawn"));

@@ -980,7 +980,6 @@ mod.extend = function(){
             if (global.DEBUG) {
                 global.logSystem(this.name, `not enough or no offers found. Updating room orders in room ${this.name}`);
             }
-            // TODO test it
             if (_.isUndefined(data.boostTiming.getOfferAttempts))
                 data.boostTiming.getOfferAttempts = 0;
             else
@@ -1015,17 +1014,16 @@ mod.extend = function(){
                     }
                 }
             }
-            // TODO test it
             if (data.boostTiming.getOfferAttempts < 3) {
                 this.updateRoomOrders();
                 data.boostTiming.ordersPlaced = Game.time;
                 data.boostTiming.checkRoomAt = Game.time + 1;
                 return true;
-            }
-            else {
+            } else {
                 data.orders = [];
                 data.reactions.orders[0].amount = 0;
                 delete data.boostTiming.getOfferAttempts;
+                global.logSystem(this.name, `${this.name} no offers found. Reaction and orders DELETED`);
             }
         } else {
             data.boostTiming.checkRoomAt = Game.time + global.CHECK_ORDERS_INTERVAL;
@@ -1091,10 +1089,10 @@ mod.extend = function(){
 
                 global.logSystem(this.name, `${readyAmount} / ${offer.amount} ${offer.type} are in ${this.name} terminal`);
 
-                if ((readyAmount >= offer.amount * 0.5 && readyAmount < offer.amount - global.MIN_OFFER_AMOUNT) || readyAmount >= offer.amount){
+                if ((readyAmount >= offer.amount * 0.5 && readyAmount < offer.amount - global.MIN_OFFER_AMOUNT) || readyAmount >= offer.amount) {
                     if (global.DEBUG)
                         global.logSystem(offer.room, `${Math.min(readyAmount, offer.amount)} ${offer.type} are ready to send from ${this.name}`);
-                    readyOffersFound ++;
+                    readyOffersFound++;
                 } else {
                     // make order in offerRoom terminal
 
@@ -1112,7 +1110,7 @@ mod.extend = function(){
                     // garbage collecting offerRoom terminal orders
                     if (terminalMemory.orders.length > 0) {
                         terminalMemory.orders = _.filter(terminalMemory.orders, order => {
-                            return (order.orderAmount > 0 || order.orderRemaining > 0 || order.storeAmount > 0) && _.some(data.offers, offer => {
+                            return (order.orderRemaining > 0 || order.storeAmount > 0) && _.some(data.offers, offer => {
                                 return (offer.type === order.type && offer.amount === order.orderRemaining + (terminal.store[offer.type] || 0));
                             });
                         });
@@ -1121,15 +1119,19 @@ mod.extend = function(){
                     // making terminal orders if it does not exist
                     for (let offer of data.offers) {
 
-                        let ordered = global.sumCompoundType(terminalMemory, 'orderRemaining'),
+                        let ordered = global.sumCompoundType(terminalMemory.orders, 'orderRemaining'),
                             allResources = (ordered[offer.type] || 0) + (terminal.store[offer.type] || 0);
                         if (offer.amount > allResources) {
+                            if (global.DEBUG) {
+                                global.logSystem(this.name, `no / not enough terminal order found in ${this.name} for ${offer.amount} ${offer.type}`);
+                                global.logSystem(this.name, `terminal stores: ${terminal.store[offer.type] || 0} ordered: ${ordered[offer.type] || 0}`);
+                                global.logSystem(this.name, `terminal order placed for ${Math.max(offer.amount, global.MIN_OFFER_AMOUNT)} ${offer.type}`);
+
+                            }
                             this.placeOrder(terminalId, offer.type, Math.max(offer.amount, global.MIN_OFFER_AMOUNT));
                             terminalOrderPlaced = true;
-                            if (global.DEBUG)
-                                global.logSystem(this.name, `no / not enough terminal order found in ${this.name} for ${offer.type} ${offer.amount}, terminal stores: ${(terminal.store[offer.type] || 0)} terminal order placed for ${offer.amount - allResources} ${offer.type}`);
-
-                        }
+                        } else
+                            global.logSystem(this.name, `${this.name} terminal orders for ${offer.amount} ${offer.type} is OK.`);
                     }
                 }
             }
@@ -1304,9 +1306,12 @@ mod.extend = function(){
 
                 let currentRoom = Game.rooms[roomName];
 
-                if (currentRoom.memory.labs.length < 3)
-                    return false;
-                else if (currentRoom.memory.labs.length === 3 && !global.MAKE_REACTIONS_WITH_3LABS)
+                if (currentRoom.memory.labs) {
+                    if (currentRoom.memory.labs.length < 3)
+                        return false;
+                    else if (currentRoom.memory.labs.length === 3 && !global.MAKE_REACTIONS_WITH_3LABS)
+                        return false;
+                } else
                     return false;
 
                 if (_.isUndefined(currentRoom.memory.resources))
@@ -1660,10 +1665,11 @@ mod.extend = function(){
             storageLabs = _.filter(data.lab, lab => {
                 return lab.reactionState === 'Storage'
             }),
-            allLabsProducedAmountPerTick = (producedAmountPerTick * (numberOfLabs - storageLabs.length - 2)) / reactionCoolDown,
+            numberOfSlaveLabs = numberOfLabs - storageLabs.length - 2,
+            allLabsProducedAmountPerTick = producedAmountPerTick * numberOfSlaveLabs / reactionCoolDown,
             amount = data.reactions.orders[0].amount;
 
-        boostTiming.checkRoomAt = boostTiming.reactionMaking + global.roundUpTo(amount / allLabsProducedAmountPerTick, reactionCoolDown) + 1;
+        boostTiming.checkRoomAt = boostTiming.reactionMaking + global.roundUpTo(amount / allLabsProducedAmountPerTick, reactionCoolDown) + reactionCoolDown;
     };
     Room.prototype.getSeedLabOrders = function () {
 

@@ -66,14 +66,15 @@ let mod = {
                     roomFound = room.makeReaction();
 
                 // log and fix next finishing reactions data
-                if (data.reactions.reactorMode === 'burst' && data.boostTiming.roomState === 'reactionMaking' && boostTiming.checkRoomAt - Game.time < 1000 && Game.time % 100 === 0) {
-                    global.logSystem(room.name, `${room.name}, finishing ${data.reactions.orders[0].type}. checkRoomAt: ${boostTiming.checkRoomAt - Game.time}`);
+                if (data.reactions && data.reactions.reactorMode === 'burst' && data.boostTiming.roomState === 'reactionMaking' && boostTiming.checkRoomAt - Game.time <= 150 && Game.time % 50 === 0) {
+                    let reactionOrder = data.reactions.orders[0];
+                    global.logSystem(room.name, `${room.name}, finishing ${reactionOrder.type}. checkRoomAt: ${boostTiming.checkRoomAt - Game.time}`);
                     let labA = Game.getObjectById(data.reactions.seed_a),
                         labB = Game.getObjectById(data.reactions.seed_b),
-                        orderType = data.reactions.orders[0].type,
+                        orderType = reactionOrder.type,
                         component_a = global.LAB_REACTIONS[orderType][0],
                         component_b = global.LAB_REACTIONS[orderType][1],
-                        reactionAmount = data.reactions.orders[0].amount,
+                        reactionAmount = reactionOrder.amount,
                         labOrderAmounts = room.getSeedLabOrders(),
                         labOrderAmountA = labOrderAmounts.labOrderAmountA,
                         labOrderAmountB = labOrderAmounts.labOrderAmountB,
@@ -89,31 +90,32 @@ let mod = {
 
                     if (labResourcesA === reactionAmount && labResourcesB === reactionAmount) {
                         global.logSystem(room.name, `lab orders OK`);
-                        if (_.isUndefined(resourcesA) || _.isUndefined(resourcesB)) {
-                            data.reactions.orders[0].amount = 0;
-                            global.logSystem(room.name, `resources NOT OK`);
-                            global.logSystem(room.name, `resourcesA: ${resourcesA} resourcesB: ${resourcesB}`);
-                            global.logSystem(room.name, `reactionOrders deleted`);
+                        if (reactionAmount > 0) {
+                            if (((_.isUndefined(resourcesA) || resourcesA === 0) && labA.mineralAmount < LAB_REACTION_AMOUNT) || ((_.isUndefined(resourcesB) || resourcesB === 0) && labB.mineralAmount < LAB_REACTION_AMOUNT)) {
+                                reactionOrder.amount = 0;
+                                global.logSystem(room.name, `resources NOT OK`);
+                                global.logSystem(room.name, `resourcesA: ${resourcesA} resourcesB: ${resourcesB}`);
+                                global.logSystem(room.name, `reactionOrders fixed: ${reactionOrder.amount}`);
+                            }
                         }
-                    }
-                    else if (reactionAmount > labResourcesA || reactionAmount > labResourcesB) {
+                    } else if (reactionAmount > labResourcesA || reactionAmount > labResourcesB) {
                         global.logSystem(room.name, `NOT ENOUGH lab orders:`);
                         global.logSystem(room.name, `${room.name} reactionAmount: ${reactionAmount} DIFF: labA: ${labResourcesA - reactionAmount} labB: ${labResourcesB - reactionAmount}`);
                         let minAmount = Math.min(labResourcesA, labResourcesB);
                         if (minAmount >= LAB_REACTION_AMOUNT)
-                            data.reactions.orders[0].amount = minAmount;
+                            reactionOrder.amount = minAmount;
                         else
-                            data.reactions.orders[0].amount = 0;
-                        global.logSystem(room.name, `reactionOrders fixed: ${data.reactions.orders[0].amount}`);
+                            reactionOrder.amount = 0;
+                        global.logSystem(room.name, `reactionOrders fixed: ${reactionOrder.amount}`);
                     } else if (reactionAmount < labResourcesA || reactionAmount < labResourcesB) {
                         global.logSystem(room.name, `TOO MUCH lab orders:`);
                         global.logSystem(room.name, `${room.name} reactionAmount: ${reactionAmount} DIFF: labA: ${labResourcesA - reactionAmount} labB: ${labResourcesB - reactionAmount}`);
                         let minAmount = Math.min(labResourcesA, labResourcesB);
                         if (minAmount >= LAB_REACTION_AMOUNT)
-                            data.reactions.orders[0].amount = minAmount;
+                            reactionOrder.amount = minAmount;
                         else
-                            data.reactions.orders[0].amount = 0;
-                        global.logSystem(room.name, `reactionOrders fixed: ${data.reactions.orders[0].amount}`);
+                            reactionOrder.amount = 0;
+                        global.logSystem(room.name, `reactionOrders fixed: ${reactionOrder.amount}`);
                     }
                 }
 
@@ -134,7 +136,6 @@ let mod = {
                     }
                 }
             }
-
         }
     }
 };
