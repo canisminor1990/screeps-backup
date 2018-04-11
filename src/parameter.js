@@ -194,7 +194,7 @@ let mod = {
 	PIONEER_UNOWNED: false, // True: pioneers may attempt to work in unowned rooms.
 	DRIVE_BY_REPAIR_RANGE: 2, // range that creeps should search when trying to repair and move
 	REMOTE_WORKER_MULTIPLIER: 1, // Number of workers spawned per remote mining room.
-	PLAYER_WHITELIST: ['sourwafer', 'Ruonyy'],
+	PLAYER_WHITELIST: ['sourwafer', 'Ruonyy', 'CaptainMuscles'],
 	// Don't attack. Must be a member of CCC for permanent whitelisting in git repository. But you can change your own copy... Please ask if you are interested in joining CCC :)
 	DEFENSE_BLACKLIST: [], // Don't defend those rooms (add room names). Blocks spawning via defense task (will not prevent offensive actions at all)
 	CRITICAL_BUCKET_LEVEL: 1000, // take action when the bucket drops below this value to prevent the bucket from actually running out
