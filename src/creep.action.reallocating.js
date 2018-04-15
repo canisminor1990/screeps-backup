@@ -555,6 +555,26 @@ action.unloadPowerSpawn = function(creep) {
     } else this.cancelAction(creep);
     return workResult;
 };
+action.unloadNuker = function(creep) {
+	let target = creep.target;
+	var workResult = null;
+	var resource = null;
+	var amount = 0;
+	amount = -target.getNeeds(RESOURCE_ENERGY);
+	if (amount > 0) resource = RESOURCE_ENERGY;
+	if (!resource) {
+		amount = -target.getNeeds(RESOURCE_GHODIUM)
+		if (amount > 0) resource = RESOURCE_GHODIUM;
+	}
+	if (resource) {
+		workResult = this.unloadStructure(creep, target, resource, amount);
+	}
+	if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating-unloadNuker', roomName: room.name, creepName: creep.name, structureId: target.id, resourceType: resource, needs: amount, workResult });
+	if (workResult == OK) {
+		this.assignDropOff(creep, resource);
+	} else this.cancelAction(creep);
+	return workResult;
+};
 action.unloadContainer = function(creep) {
     let target = creep.target;
     var workResult = null;
@@ -735,6 +755,33 @@ action.loadPowerSpawn = function(creep) {
     }
     return workResult;
 };
+action.loadNuker = function(creep) {
+	let target = creep.target;
+	let room = creep.room;
+	var workResult = null;
+	var resource = null;
+	var amount = 0;
+	// drop off at powerSpawn
+	if (room.memory.resources && room.memory.resources.nuker === undefined) room.memory.resources.nuker = [];
+	amount = target.getNeeds(RESOURCE_ENERGY);
+	if (amount > 0 && (creep.carry.energy||0) > 0) {
+		resource = RESOURCE_ENERGY;
+	} else {
+		amount = target.getNeeds(RESOURCE_GHODIUM);
+		if (amount > 0 && (creep.carry[RESOURCE_GHODIUM]||0) > 0) {
+			resource = RESOURCE_GHODIUM;
+		}
+	}
+	if (resource) workResult = this.loadStructure(creep, target, resource, amount);
+	if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating-loadNuker', roomName: room.name, creepName: creep.name, structureId: target.id, resourceType: resource, needs: amount, workResult });
+
+	if ((creep.carry[resource]||0) > amount) {
+		this.assignDropOff(creep, resource);
+	} else {
+		this.cancelAction(creep);
+	}
+	return workResult;
+};
 action.loadContainer = function(creep) {
     let target = creep.target;
     let room = creep.room;
@@ -854,7 +901,7 @@ action.work = function(creep) {
                 workResult = this.loadPowerSpawn(creep);
                 break;
 	          case STRUCTURE_NUKER:
-	              workResult = this.loadPowerSpawn(creep);
+	              workResult = this.loadNuker(creep);
 		            break;
             case STRUCTURE_CONTAINER:
                 workResult = this.loadContainer(creep);
