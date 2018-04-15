@@ -237,6 +237,7 @@ mod.extend = function() {
                 container.structureType == STRUCTURE_POWER_SPAWN ||
                 container.structureType == STRUCTURE_CONTAINER ||
                 container.structureType == STRUCTURE_STORAGE ||
+                container.structureType == STRUCTURE_NUKER ||
                 container.structureType == STRUCTURE_TERMINAL)) {
             return ERR_INVALID_TARGET;
         }
