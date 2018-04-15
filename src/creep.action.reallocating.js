@@ -55,7 +55,7 @@ action.findNeeding = function(room, resourceType, amountMin, structureId){
 			const nuker = Game.getObjectById(nukers[i].id);
 			let amount = 0;
 			if (nuker) amount = nuker.getNeeds(resourceType);
-			if (amount >= amountMin && (resourceType == RESOURCE_GHODIUM || resourceType == RESOURCE_ENERGY) && nukers.id != structureId) {
+			if (amount >= amountMin && (resourceType == RESOURCE_GHODIUM || resourceType == RESOURCE_ENERGY) && nuker.id != structureId) {
 				return { structure: nuker, amount: amount};
 			}
 		}
@@ -241,13 +241,13 @@ action.newTargetNuker = function(creep) {
 			amount = nuker.getNeeds(RESOURCE_GHODIUM);
 			if (amount > 0) {
 				// powerSpawn needs energy so find a lower priority container with some
-				if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, structureId: nuker.id, resourceType: RESOURCE_POWER, needs: amount });
+				if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, structureId: nuker.id, resourceType: RESOURCE_GHODIUM, needs: amount });
 				if (room.storage && room.storage.active && room.storage.store[RESOURCE_GHODIUM]) {
 					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: room.storage.id, resourceType: RESOURCE_GHODIUM, targetNeeds: room.storage.store[RESOURCE_GHODIUM] });
 					creep.data.reallocating = RESOURCE_GHODIUM;
 					return room.storage;
 				}
-				if (room.terminal && room.terminal.active && room.terminal.getNeeds(RESOURCE_POWER) < 0) {
+				if (room.terminal && room.terminal.active && room.terminal.getNeeds(RESOURCE_GHODIUM) < 0) {
 					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: room.terminal.id, resourceType: RESOURCE_GHODIUM, targetNeeds: room.terminal.store[RESOURCE_GHODIUM] });
 					creep.data.reallocating = RESOURCE_GHODIUM;
 					return room.terminal;
