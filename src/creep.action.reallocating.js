@@ -54,7 +54,7 @@ action.findNeeding = function(room, resourceType, amountMin, structureId){
 		for (let i = 0; i < nukers.length; i++) {
 			const nuker = Game.getObjectById(nukers[i].id);
 			let amount = 0;
-			if (powerSpawn) amount = nukers.getNeeds(resourceType);
+			if (nukers) amount = nukers.getNeeds(resourceType);
 			if (amount >= amountMin && (resourceType == RESOURCE_GHODIUM || resourceType == RESOURCE_ENERGY) && nukers.id != structureId) {
 				return { structure: nuker, amount: amount};
 			}
