@@ -250,10 +250,12 @@ mod.extend = function() {
                 powerSpawn: [],
                 container: [],
                 terminal: [],
+                nuker: [],
                 storage: []
             };
         }
         if (this.memory.resources.powerSpawn === undefined) this.memory.resources.powerSpawn = [];
+	      if (this.memory.resources.nuker === undefined) this.memory.resources.nuker = [];
         if (!this.memory.resources[container.structureType].find( (s) => s.id == containerId )) {
             this.memory.resources[container.structureType].push(container.structureType==STRUCTURE_LAB ? {
                 id: containerId,
