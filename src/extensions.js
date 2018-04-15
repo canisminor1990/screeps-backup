@@ -466,10 +466,10 @@ mod.extend = function(){
 	  StructureNuker.prototype.getNeeds = function(resourceType) {
 		// if parameter is enabled then autofill powerSpawns
 		if(!this.room.isCriticallyFortifyable) {
-			if( resourceType == RESOURCE_ENERGY && this.energy < this.energyCapacity * 0.75 ) {
+			if( resourceType == RESOURCE_ENERGY && this.energy < this.energyCapacity) {
 				return this.energyCapacity - this.energy;
 			}
-			if( resourceType == RESOURCE_GHODIUM && this.ghodium < this.ghodiumCapacity * 0.25 ) {
+			if( resourceType == RESOURCE_GHODIUM && this.ghodium < this.ghodiumCapacity) {
 				return this.ghodiumCapacity - this.ghodium;
 			}
 			return 0;
