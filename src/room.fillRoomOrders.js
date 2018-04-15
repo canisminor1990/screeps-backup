@@ -64,7 +64,7 @@ let mod = {
 
             if (ordersWithOffers) {
                 let returnValue = room.checkOffers();
-                global.logSystem(room.name, `checkOffers running from ${room.name} returnValue: ${returnValue}`);
+                global.logSystem(room.name, `checkOffers called from ${room.name} returnValue: ${returnValue}`);
             } else {
                 global.logSystem(room.name, `${room.name} no offers found, updating offers`);
                 room.GCOrders();

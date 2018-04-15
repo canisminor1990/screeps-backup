@@ -112,15 +112,12 @@ mod.extend = function() {
                     if (!room.memory.resources.offers)
                         room.memory.resources.offers = [];
                     let remoteOffers = room.memory.resources.offers;
-                    //let offered = global.sumCompoundType(remoteOffers);
-                    //let available = (room.resourcesStorage[order.type] || 0) + (room.resourcesTerminal[order.type] || 0) - (room.resourcesReactions[order.type] || 0) - (offered[order.type] || 0);
                     let available = room.resourcesAll[order.type] || 0;
-                    //global.logSystem(room.name, `${room.name} ${available} ${order.type}`);
                     if (available < global.MIN_OFFER_AMOUNT)
                         continue;
 
                     // for COMPOUNDS_TO_ALLOCATE
-                    if (!_.isUndefined(global.COMPOUNDS_TO_ALLOCATE[order.type])) {
+                    if (!_.isUndefined(global.COMPOUNDS_TO_ALLOCATE[order.type]) && global.COMPOUNDS_TO_ALLOCATE[order.type].allocate) {
                         let reservedAmount = global.COMPOUNDS_TO_ALLOCATE[order.type].amount + global.COMPOUNDS_TO_ALLOCATE[order.type].threshold;
                         if (available < reservedAmount + global.MIN_OFFER_AMOUNT)
                             continue;

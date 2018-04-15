@@ -69,9 +69,16 @@ mod.extend = function() {
 
     Room.prototype.processLabs = function() {
         // only process labs every 10 turns and avoid room tick
-        if (Game.time % LAB_COOLDOWN !== 5) return;
         let labs = this.find(FIND_MY_STRUCTURES, { filter: (s) => { return s.structureType == STRUCTURE_LAB; } } );
-        if (!this.memory.resources) return;
+        let data = this.memory.resources;
+        if (!data) return;
+        let timing;
+        if (!data.reactions || data.reactions.orders.length === 0 || data.boostTiming.roomState !== 'reactionMaking')
+            timing = Game.time % 10 !== 5;
+        else
+            timing = Game.time % REACTION_TIME[data.reactions.orders[0].type] === 0;
+
+        if (!timing) return;
         // run basic reactions
         let master_labs = labs.filter( (l) => {
             let data = this.memory.resources.lab.find( (s) => s.id == l.id );
@@ -81,7 +88,7 @@ mod.extend = function() {
             // see if the reaction is possible
             let master = master_labs[i];
             if (master.cooldown > 0) continue;
-            let data = this.memory.resources.lab.find( (s) => s.id == master.id );
+            let data = data.lab.find( (s) => s.id == master.id );
             if (!data) continue;
             let compound = data.reactionType;
             if (master.mineralAmount > 0 && master.mineralType != compound) continue;
@@ -99,9 +106,9 @@ mod.extend = function() {
         }
 
         // run reactors
-        let data = this.memory.resources.reactions;
-        if ( !data ) return;
-        switch ( data.reactorType ) {
+        let reactions = data.reactions;
+        if ( !reactions ) return;
+        switch ( reactions.reactorType ) {
             case REACTOR_TYPE_FLOWER:
                 this.processReactorFlower();
                 break;
@@ -167,6 +174,8 @@ mod.extend = function() {
                 if (room.name === that.name)
                     continue;
                 let resourcesAll = room.resourcesAll[component] || 0;
+                if (global.COMPOUNDS_TO_ALLOCATE[component] && global.COMPOUNDS_TO_ALLOCATE[component].allocate)
+                    resourcesAll -= global.COMPOUNDS_TO_ALLOCATE[component].amount + global.COMPOUNDS_TO_ALLOCATE[component].threshold;
                 if (resourcesAll >= global.MIN_OFFER_AMOUNT)
                     roomStored += resourcesAll;
             }
@@ -185,7 +194,7 @@ mod.extend = function() {
             this.placeOrder(data.seed_a, component_a, order.amount);
             labOrderPlaced = true;
 
-            let resourcesStored = (this.resourcesStorage[component_a] || 0) + (this.resourcesTerminal[component_a] || 0) + (this.resourcesLabs[component_a] || 0),
+            let resourcesStored = (this.resourcesStorage[component_a] || 0) + (this.resourcesTerminal[component_a] || 0),
                 resourcesOffered = (this.resourcesOffers[component_a] || 0) + order.amount,
                 amountToOrder = resourcesOffered - resourcesStored;
 
@@ -211,7 +220,7 @@ mod.extend = function() {
             this.placeOrder(data.seed_b, component_b, order.amount);
             labOrderPlaced = true;
 
-            let resourcesStored = (this.resourcesStorage[component_b] || 0) + (this.resourcesTerminal[component_b] || 0) + (this.resourcesLabs[component_b] || 0),
+            let resourcesStored = (this.resourcesStorage[component_b] || 0) + (this.resourcesTerminal[component_b] || 0),
                 resourcesOffered = (this.resourcesOffers[component_b] || 0) + order.amount,
                 amountToOrder = resourcesOffered - resourcesStored;
 
@@ -240,7 +249,7 @@ mod.extend = function() {
             this.placeOrder(data.seed_a, component_a, orderAmount);
             labOrderPlaced = true;
 
-            let resourcesStored = (this.resourcesStorage[component_a] || 0) + (this.resourcesTerminal[component_a] || 0) + (this.resourcesLabs[component_a] || 0),
+            let resourcesStored = (this.resourcesStorage[component_a] || 0) + (this.resourcesTerminal[component_a] || 0),
                 resourcesOffered = (this.resourcesOffers[component_a] || 0) + order.amount,
                 amountToOrder = resourcesOffered - resourcesStored;
 
@@ -269,7 +278,7 @@ mod.extend = function() {
             this.placeOrder(data.seed_b, component_b, orderAmount);
             labOrderPlaced = true;
 
-            let resourcesStored = (this.resourcesStorage[component_b] || 0) + (this.resourcesTerminal[component_b] || 0) + (this.resourcesLabs[component_b] || 0),
+            let resourcesStored = (this.resourcesStorage[component_b] || 0) + (this.resourcesTerminal[component_b] || 0),
                 resourcesOffered = (this.resourcesOffers[component_b] || 0) + order.amount,
                 amountToOrder = resourcesOffered - resourcesStored;
 

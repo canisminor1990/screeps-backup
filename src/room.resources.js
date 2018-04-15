@@ -80,7 +80,7 @@ mod.extend = function() {
                     this._resourcesCreeps = {};
 
                     for (let creep of this.creeps) {
-                        Object.keys(creep.carries).forEach(content => {
+                        Object.keys(creep.carry).forEach(content => {
                             if (_.isUndefined(this._resourcesCreeps[content]))
                                 this._resourcesCreeps[content] = creep.carry[content];
                             else

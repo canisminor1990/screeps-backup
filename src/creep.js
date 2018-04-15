@@ -345,20 +345,6 @@ mod.extend = function(){
                 return this._sum;
             }
         },
-        'carries': {
-            configurable: true,
-            get: function() {
-                if (_.isUndefined(this._carries) || this._carrySet !== Game.time) {
-                    this._carrySet = Game.time;
-                    this._carries = {};
-                    Object.keys(this.carry).forEach(content => {
-                        if (_.isUndefined(this._carries[content]))
-                            this._carries[content] = this.carry[content];
-                    });
-                }
-                return this._carries;
-            }
-        },
         'threat': {
             configurable: true,
             get: function() {

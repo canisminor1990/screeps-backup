@@ -46,12 +46,12 @@ let mod = {
 		ROOM_ORDERS: true, // display orders the room creates
 		ROOM_OFFERS: true, // display what a room will offer another
 		SPAWN: true, // displays creep name and spawn progress percentage when spawning
-		CONTROLLER: true, // displays level, progress, and ticks to downgrade if active
+		CONTROLLER: false, // displays level, progress, and ticks to downgrade if active
 		STORAGE: true, // displays storage contents
 		TERMINAL: true, // displays terminal contents
-		TOWER: true, // displays tower contents
-		TRANSACTIONS: true, // displays 2 most recent transactions over room terminal
-		LABS: true, // displays lab energy, mineral, or cooldown
+		TOWER: false, // displays tower contents
+		TRANSACTIONS: false, // displays 2 most recent transactions over room terminal
+		LABS: false, // displays lab energy, mineral, or cooldown
 		MINERAL: true, // displays mineral amount, or ticks to regen
 		SOURCE: true, // displays energy amount, or ticks to regen
 		CREEP: true, // draws creep paths
@@ -86,7 +86,7 @@ let mod = {
 		7: 25000,
 		8: 50000
 	},
-	MAX_STORAGE_MINERAL:100000, // keep a max of each type of minerals in store
+	MAX_STORAGE_MINERAL:200000, // keep a max of each type of minerals in store
 	ROOM_TRADING: true, // set this true to enable haulers within your colony to request resources from other rooms in your colony
 	FILL_POWERSPAWN: true,
 	MIN_MINERAL_SELL_AMOUNT: 20000,
@@ -97,8 +97,8 @@ let mod = {
 	TARGET_STORAGE_SUM_RATIO: 0.6,
 	AUTOMATED_RATIO_COUNT: true,
 	MIN_SELL_RATIO: {
-		'H': 0.25,
-		'O': 0.25,
+		'H': 0.2,
+		'O': 0.2,
 		'U': 0.4,
 		'L': 0.4,
 		'K': 0.4,
@@ -107,8 +107,8 @@ let mod = {
 	},
 	// prices for automated buy, adjust it to your shard prices
 	MAX_BUY_RATIO: {
-		'H': 0.3,
-		'O': 0.3,
+		'H': 0.2,
+		'O': 0.2,
 		'L': 0.3,
 		'U': 0.3,
 		'K': 0.3,
@@ -143,7 +143,7 @@ let mod = {
 		5: 100000,
 		6: 300000,
 		7: 750000,
-		8: 300000000
+		8: 30000000
 	},
 	MAX_FORTIFY_CONTAINER: 50000,
 	LIMIT_URGENT_REPAIRING: 750, // urgent repair when hits below
@@ -168,7 +168,7 @@ let mod = {
 	NOTIFICATE_INVADER: false, // Also log common 'Invader' hostiles
 	NOTIFICATE_INTRUDER: true, // Log any hostiles in your rooms
 	NOTIFICATE_HOSTILES: true, // Log any hostiles - Ignores NOTIFICATE_INTRUDER and NOTIFICATE_INVADER
-	COMBAT_CREEPS_RESPECT_RAMPARTS: false, // causes own creeps not to leave through ramparts when defending
+	COMBAT_CREEPS_RESPECT_RAMPARTS: true, // causes own creeps not to leave through ramparts when defending
 	COST_MATRIX_VALIDITY: 1000,
 	// function parameters: room. expected result: array
 	CONSTRUCTION_PRIORITY: [STRUCTURE_SPAWN,STRUCTURE_EXTENSION,STRUCTURE_LINK,STRUCTURE_TERMINAL,STRUCTURE_STORAGE,STRUCTURE_TOWER,STRUCTURE_POWER_SPAWN,STRUCTURE_NUKER,STRUCTURE_OBSERVER,STRUCTURE_ROAD,STRUCTURE_CONTAINER,STRUCTURE_EXTRACTOR,STRUCTURE_LAB,STRUCTURE_WALL,STRUCTURE_RAMPART],
@@ -205,37 +205,37 @@ let mod = {
 	OBSERVER_OBSERVE_HIGHWAYS_ONLY: true, // the observers will only look at highways - changing this will require you to clear cached rooms
 	COMPRESS_COST_MATRICES: false, // enable to compress cached cost matrices (1/5 the size, but currently about 2x CPU usage)
 	ACTION_SAY: { // what gets said on creep.action.*.onAssignment
-		ATTACK_CONTROLLER: String.fromCodePoint(0x1F680), // 🚀
-		AVOIDING: String.fromCodePoint(0x1F440), // 👀
-		BOOSTING: String.fromCodePoint(0x1F525), // 🔥
-		BUILDING: String.fromCodePoint(0x1F3D7), // 🏗
-		BULLDOZING: String.fromCodePoint(0x1F69C), // 🚜
-		CHARGING: String.fromCodePoint(0x1F50C), // 🔌
-		CLAIMING: String.fromCodePoint(0x26F3), // ⛳
-		DEFENDING: String.fromCodePoint(0x2694), // ⚔
-		DISMANTLING: String.fromCodePoint(0x26D1), // ⛑
-		DROPPING: String.fromCodePoint(0x1F4A9), // 💩
-		FEEDING: String.fromCodePoint(0x1F355), // 🍕
-		FORTIFYING: String.fromCodePoint(0x1F6A7), // 🚧
-		FUELING: String.fromCodePoint(0x26FD), // ⛽
-		GUARDING: String.fromCodePoint(0x1F6E1), // 🛡
-		HARVESTING: String.fromCodePoint(0x26CF), // ⛏
-		HEALING: String.fromCodePoint(0x1F48A), // 💊
-		IDLE: String.fromCodePoint(0x1F3B5), // 🎵
-		INVADING: String.fromCodePoint(0x1F52B), // 🔫
-		MINING: String.fromCodePoint(0x26CF), // ⛏
-		PICKING: String.fromCodePoint(0x1F9E4), // 🧤
-		REALLOCATING: String.fromCodePoint(0x1F52E), // 🔮
-		RECYCLING: String.fromCodePoint(0x1F504), // 🔄
-		REPAIRING: String.fromCodePoint(0x1F527), // 🔧
-		RESERVING: String.fromCodePoint(0x1F6A9), // 🚩
-		ROBBING: String.fromCodePoint(0x1F47B), // 👻
-		STORING: String.fromCodePoint(0x23EC), // ⏬
-		TRAVELLING: String.fromCodePoint(0x1F3C3), // 🏃
-		UNCHARGING: String.fromCodePoint(0x1F50B), // 🔋
-		UPGRADING: String.fromCodePoint(0x1F64F), // 🙏
-		WITHDRAWING: String.fromCodePoint(0x23EB), // ⏫
-		SAFEGEN: String.fromCodePoint(0x1F512), // 🔒
+		ATTACK_CONTROLLER: String.fromCodePoint(0x1F680), // ð
+		AVOIDING: String.fromCodePoint(0x1F440), // ð
+		BOOSTING: String.fromCodePoint(0x1F525), // ð¥
+		BUILDING: String.fromCodePoint(0x1F3D7), // ð
+		BULLDOZING: String.fromCodePoint(0x1F69C), // ð
+		CHARGING: String.fromCodePoint(0x1F50C), // ð
+		CLAIMING: String.fromCodePoint(0x26F3), // â³
+		DEFENDING: String.fromCodePoint(0x2694), // â
+		DISMANTLING: String.fromCodePoint(0x26D1), // â
+		DROPPING: String.fromCodePoint(0x1F4A9), // ð©
+		FEEDING: String.fromCodePoint(0x1F355), // ð
+		FORTIFYING: String.fromCodePoint(0x1F6A7), // ð§
+		FUELING: String.fromCodePoint(0x26FD), // â½
+		GUARDING: String.fromCodePoint(0x1F6E1), // ð¡
+		HARVESTING: String.fromCodePoint(0x26CF), // â
+		HEALING: String.fromCodePoint(0x1F48A), // ð
+		IDLE: String.fromCodePoint(0x1F3B5), // ðµ
+		INVADING: String.fromCodePoint(0x1F52B), // ð«
+		MINING: String.fromCodePoint(0x26CF), // â
+		PICKING: String.fromCodePoint(0x1F9E4), // ð§¤
+		REALLOCATING: String.fromCodePoint(0x1F52E), // ð®
+		RECYCLING: String.fromCodePoint(0x1F504), // ð
+		REPAIRING: String.fromCodePoint(0x1F527), // ð§
+		RESERVING: String.fromCodePoint(0x1F6A9), // ð©
+		ROBBING: String.fromCodePoint(0x1F47B), // ð»
+		STORING: String.fromCodePoint(0x23EC), // â¬
+		TRAVELLING: String.fromCodePoint(0x1F3C3), // ð
+		UNCHARGING: String.fromCodePoint(0x1F50B), // ð
+		UPGRADING: String.fromCodePoint(0x1F64F), // ð
+		WITHDRAWING: String.fromCodePoint(0x23EB), // â«
+		SAFEGEN: String.fromCodePoint(0x1F512), // ð
 	},
 	// automatedBoostProduction
 	// rooms with storage, terminal and flower registered labs loaded with energy are needed for the process
@@ -259,11 +259,17 @@ let mod = {
 			amount: 5000,   // amount to make when room.resourcesAll <= threshold (keep producing, while room.resourcesAll[compound] < amount + threshold
 			rooms: []       // rooms involved, leave it empty for all rooms
 		},
+		GH2O: {        // +80% upgradeController effectiveness without increasing the energy cost
+			make: false,
+			threshold: 9000,
+			amount: 3000,
+			rooms: []
+		},
 		XGH2O: {        // +100% upgradeController effectiveness without increasing the energy cost
 			make: false,
 			threshold: 9000,
 			amount: 3000,
-			rooms: ['E8N45']
+			rooms: []
 		},
 		XUH2O: {        // +300% attack effectiveness
 			make: false,
@@ -329,11 +335,20 @@ let mod = {
 	COMPOUNDS_TO_ALLOCATE: {
 		XGH2O : {       // +100% upgradeController effectiveness without increasing the energy cost
 			allocate: false, // allocate this compound
-			allocateRooms: ['E8N45'], // rooms to allocate, leave it empty for all rooms
+			allocateRooms: [], // rooms to allocate, leave it empty for all rooms
 			threshold: 3000, // allocating will start when compound is below threshold
-			amount: 3000,  // amount to allocate
+			amount: 1550,  // amount to allocate
 			storeTo: 'lab', // 'storage' or 'lab'
 			labRefilledAt: 500 // lab refilled below this amount, it is meaningless if storeTo = 'storage'
+		},
+		GH2O : {       // +80% upgradeController effectiveness without increasing the energy cost
+			allocate: false,
+			superior: 'XGH2O', // do not allocate when superior allocated
+			allocateRooms: [],
+			threshold: 3000,
+			amount: 1550,
+			storeTo: 'lab',
+			labRefilledAt: 900
 		},
 		XUH2O : {       // +300% attack effectiveness
 			allocate: false,

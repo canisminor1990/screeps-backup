@@ -987,6 +987,8 @@ mod.extend = function(){
 
             // GCAllRoomOffers
             global.logSystem(this.name, `${this.name} running GCAllRoomOffers`);
+
+            /*
             for (let room of myRooms) {
                 if (!room.memory.resources)
                     continue;
@@ -1014,9 +1016,22 @@ mod.extend = function(){
                     }
                 }
             }
+            */
+
+            for (let room of myRooms) {
+                let data = room.memory.resources;
+
+                if (!data)
+                    continue;
+
+                data.terminal[0].orders = [];
+                data.offers = [];
+
+            }
+
             if (data.boostTiming.getOfferAttempts < 3) {
                 this.updateRoomOrders();
-                data.boostTiming.ordersPlaced = Game.time;
+                //data.boostTiming.ordersPlaced = Game.time;
                 data.boostTiming.checkRoomAt = Game.time + 1;
                 return true;
             } else {
@@ -1096,12 +1111,14 @@ mod.extend = function(){
                 } else {
                     // make order in offerRoom terminal
 
+/*
                     // TODO for new room. is it needed? first time problem. Someone else has to be to this...
                     if (this.memory.resources.terminal.length === 0)
                         this.memory.resources.terminal.push({
                             id: this.terminal.id,
                             orders: []
                         });
+*/
 
                     let terminalMemory = this.memory.resources.terminal[0],
                         terminalId = this.memory.resources.terminal[0].id,
@@ -1117,22 +1134,20 @@ mod.extend = function(){
                     }
 
                     // making terminal orders if it does not exist
-                    for (let offer of data.offers) {
+                    let ordered = global.sumCompoundType(terminalMemory.orders, 'orderRemaining'),
+                        allResources = (ordered[offer.type] || 0) + (terminal.store[offer.type] || 0);
+                    if (offer.amount > allResources) {
+                        if (global.DEBUG) {
+                            global.logSystem(this.name, `no / not enough terminal order found in ${this.name} for ${offer.amount} ${offer.type}`);
+                            global.logSystem(this.name, `terminal stores: ${terminal.store[offer.type] || 0} ordered: ${ordered[offer.type] || 0}`);
+                            global.logSystem(this.name, `terminal order placed for ${Math.max(offer.amount, global.MIN_OFFER_AMOUNT)} ${offer.type}`);
 
-                        let ordered = global.sumCompoundType(terminalMemory.orders, 'orderRemaining'),
-                            allResources = (ordered[offer.type] || 0) + (terminal.store[offer.type] || 0);
-                        if (offer.amount > allResources) {
-                            if (global.DEBUG) {
-                                global.logSystem(this.name, `no / not enough terminal order found in ${this.name} for ${offer.amount} ${offer.type}`);
-                                global.logSystem(this.name, `terminal stores: ${terminal.store[offer.type] || 0} ordered: ${ordered[offer.type] || 0}`);
-                                global.logSystem(this.name, `terminal order placed for ${Math.max(offer.amount, global.MIN_OFFER_AMOUNT)} ${offer.type}`);
+                        }
+                        this.placeOrder(terminalId, offer.type, Math.max(offer.amount, global.MIN_OFFER_AMOUNT));
+                        terminalOrderPlaced = true;
+                    } else
+                        global.logSystem(this.name, `${this.name} terminal orders for ${offer.amount} ${offer.type} is OK.`);
 
-                            }
-                            this.placeOrder(terminalId, offer.type, Math.max(offer.amount, global.MIN_OFFER_AMOUNT));
-                            terminalOrderPlaced = true;
-                        } else
-                            global.logSystem(this.name, `${this.name} terminal orders for ${offer.amount} ${offer.type} is OK.`);
-                    }
                 }
             }
         }
@@ -1202,16 +1217,19 @@ mod.extend = function(){
         let data = this.memory.resources,
             orders = data.orders,
             candidates = [],
+            testedRooms = [],
             terminalOrderPlaced = false,
             returnValue;
 
         for (let order of orders) {
             if (order.offers.length > 0) {
                 for (let offer of order.offers) {
-
-                    let roomTested = _.some(candidates, room => {
-                        return room.room === offer.room;
+                    let roomTested = _.some(testedRooms, testedRoom => {
+                        return testedRoom === offer.room;
                     });
+
+                    //console.log(`ROOM_TESTED: ${offer.room} ${roomTested}`);
+                    //console.log(`${global.BB(testedRooms)}`);
 
                     if (!roomTested) {
                         let offerRoom = Game.rooms[offer.room];
@@ -1226,6 +1244,7 @@ mod.extend = function(){
                                 readyOffers: returnValue.readyOffersFound
                             });
                         }
+                        testedRooms.push(offer.room);
                     }
                 }
             }
@@ -1237,34 +1256,29 @@ mod.extend = function(){
             let fillARoomOrdersReturn = false;
             if (currentRoom.terminal.cooldown === 0) {
                 fillARoomOrdersReturn = currentRoom.fillARoomOrder();
-                if (fillARoomOrdersReturn === true && data.orders.length === 0 || _.sum(data.orders, 'amount') === 0) {
+                if (fillARoomOrdersReturn === true && data.orders.length === 0 || _.sum(data.orders, 'amount') <= 0) {
 
                     data.boostTiming.checkRoomAt = Game.time + 1;
                     global.logSystem(currentRoom.name, `${currentRoom.name} terminal send was successful. And there are no more orders`);
+                    delete data.boostTiming.getOfferAttempts;
                     global.logSystem(this.name, `${this.name} time: ${Game.time} boostTiming:`);
                     global.BB(data.boostTiming);
-
                     return true;
-
                 } else if (fillARoomOrdersReturn === true) {
                     data.boostTiming.checkRoomAt = Game.time + global.CHECK_ORDERS_INTERVAL;
+                    delete data.boostTiming.getOfferAttempts;
                     global.logSystem(currentRoom.name, `${currentRoom.name} terminal send was successful. BTW, there are orders remained to fulfill`);
                     global.logSystem(this.name, `${this.name} time: ${Game.time}, boostTiming:`);
                     global.BB(data.boostTiming);
-
                     return true;
                 }
-
             } else {
                 data.boostTiming.checkRoomAt = Game.time + currentRoom.terminal.cooldown + 1;
                 global.logSystem(currentRoom.name, `${currentRoom.name} terminal cooldown is: ${currentRoom.terminal.cooldown}`);
                 global.logSystem(this.name, `${this.name} time: ${Game.time}, boosTiming:`);
                 global.BB(data.boostTiming);
-
                 return false;
-
             }
-
         } else if ((candidates.length >= 1 || (candidates.length === 1 && candidates[0].readyOffers > 1)) && _.isUndefined(data.boostTiming.ordersReady)) {
             global.logSystem(this.name, `${this.name} has more than one offers ready, boostTiming.ordersReady created`);
             global.BB(candidates);
@@ -1277,7 +1291,7 @@ mod.extend = function(){
             Memory.boostTiming.multiOrderingRoomName = this.name;
             data.boostTiming.checkRoomAt = Game.time + _.sum(candidates, 'readyOffers') + 1;
             return true;
-        } else if (returnValue.terminalOrderPlaced) {
+        } else if (terminalOrderPlaced) {
             global.logSystem(this.name, `terminal orders placed for room ${this.name}`);
             data.boostTiming.checkRoomAt = Game.time + global.CHECK_ORDERS_INTERVAL;
             return false;
@@ -1300,7 +1314,7 @@ mod.extend = function(){
     };
     Room.prototype.makeReaction = function () {
 
-        let roomFound = {},
+        let roomFound = false,
             amountToMake,
             makeCompound = function (roomName, compound, amount) {
 
@@ -1316,7 +1330,11 @@ mod.extend = function(){
 
                 if (_.isUndefined(currentRoom.memory.resources))
                     return false;
+
                 if (_.isUndefined(currentRoom.memory.resources.reactions))
+                    return false;
+
+                if (currentRoom.memory.resources.reactions.reactorMode !== 'idle')
                     return false;
 
                 let data = currentRoom.memory.resources.reactions,
@@ -1332,6 +1350,8 @@ mod.extend = function(){
 
                                 for (let room of myRooms) {
                                     let resourcesAll = room.resourcesAll[mineral] || 0;
+                                    if (global.COMPOUNDS_TO_ALLOCATE[mineral] && global.COMPOUNDS_TO_ALLOCATE[mineral].allocate)
+                                        resourcesAll -= global.COMPOUNDS_TO_ALLOCATE[mineral].amount + global.COMPOUNDS_TO_ALLOCATE[mineral].threshold;
                                     if (resourcesAll >= global.MIN_OFFER_AMOUNT)
                                         roomStored += resourcesAll;
                                 }
@@ -1420,7 +1440,12 @@ mod.extend = function(){
 
                         return product;
                     },
+                    mineralPurchased = false,
+                    ingredientMade = false,
                     purchaseMinerals = function (roomName, mineral, amount) {
+
+                        if (mineralPurchased)
+                            return false;
 
                         if (!global.PURCHASE_MINERALS) {
                             if (global.DEBUG)
@@ -1437,10 +1462,6 @@ mod.extend = function(){
                         if (currentRoom.terminal.cooldown > 0) {
                             if (global.DEBUG)
                                 console.log(`terminal.coolDown in ${roomName} is ${currentRoom.terminal.cooldown}, purchase for ${mineral} is delayed`);
-                            return false;
-                        }
-
-                        if (data.reactorMode !== 'idle') {
                             return false;
                         }
 
@@ -1496,19 +1517,25 @@ mod.extend = function(){
                             console.log('selected order: ');
                             global.BB(order);
 
+                            if (order) {
 
-                            if (global.DEBUG && order) {
-                                console.log(`Game.market.deal("${order.id}", ${order.transactionAmount}, "${roomName}");`);
-                            }
-                            returnValue = Game.market.deal(order.id, order.transactionAmount, roomName);
-                            if (returnValue === OK) {
-                                console.log(`Purchased ${order.transactionAmount} ${mineral} at price: ${order.price} it costs: ${order.transactionAmount * order.price}`);
-                                return true;
-                            } else {
-                                console.log(`purchase was FAILED error code: ${translateErrorCode(returnValue)}`);
-                                console.log(returnValue);
+                                global.logSystem(roomName, `Game.market.deal("${order.id}", ${order.transactionAmount}, "${roomName}");`);
+                                returnValue = Game.market.deal(order.id, order.transactionAmount, roomName);
+
+                                if (returnValue === OK && order.transactionAmount === amount) {
+                                    global.logSystem(roomName, `Purchased ${order.transactionAmount} ${mineral} at price: ${order.price} it costs: ${order.transactionAmount * order.price}`);
+                                    return true;
+                                } else if (returnValue === OK) {
+                                    global.logSystem(roomName, `Purchased ${order.transactionAmount} ${mineral} at price: ${order.price} it costs: ${order.transactionAmount * order.price}`);
+                                    global.logSystem(roomName, `${amount - order.transactionAmount} ${mineral}, left for buying`);
+                                    return false;
+                                } else {
+                                    global.logSystem(roomName, `purchase was FAILED error code: ${translateErrorCode(returnValue)}`);
+                                    console.log(returnValue);
+                                    return false;
+                                }
+                            } else
                                 return false;
-                            }
 
                         } else {
                             if (global.DEBUG) {
@@ -1561,8 +1588,6 @@ mod.extend = function(){
                         return returnValue;
                     },
                     product = whatNeeds(compound, amount),
-                    mineralPurchased = false,
-                    ingredientMade = false,
                     compoundArray = [],
                     currentCompound;
 
@@ -1581,9 +1606,9 @@ mod.extend = function(){
                 if (currentRoom.terminal.isActive() === false || currentRoom.storage.isActive() === false || Game.getObjectById(currentRoom.memory.labs[0].id).isActive() === false)
                     return false;
 
-                Object.keys(product).forEach(ingredients => {
+                for (let ingredients in product) {
 
-                    Object.keys(product[ingredients]).forEach(ingredient => {
+                    for (let ingredient in product[ingredients]) {
 
                         let ingredientAmount = product[ingredients][ingredient];
 
@@ -1592,11 +1617,10 @@ mod.extend = function(){
                             // purchase minerals if it can not be ordered
                             if (ingredient.length === 1 && ingredient !== 'G' && (currentRoom.resourcesAll[ingredient] || 0) < ingredientAmount && !mineralPurchased) {
                                 mineralPurchased = purchaseMinerals(roomName, ingredient, ingredientAmount);
-                                if (!mineralPurchased)
-                                    return {
-                                        ingredientMade: ingredientMade,
-                                        mineralPurchased: mineralPurchased
-                                    }
+                                if (!mineralPurchased) {
+                                    global.logSystem(roomName, `tried to purchase minerals, but failed`);
+                                    return false;
+                                }
                             }
                             // if ingredient can make, collect the compounds
                             if (!mineralPurchased) {
@@ -1607,8 +1631,9 @@ mod.extend = function(){
                                     });
                             }
                         }
-                    });
-                });
+                    }
+                }
+
                 // define tier 3 compound
                 if (compoundArray.length === 0)
                     compoundArray.push({
@@ -1619,34 +1644,34 @@ mod.extend = function(){
                 if (!mineralPurchased) {
                     currentCompound = compoundArray[compoundArray.length - 1];
                     ingredientMade = makeIngredient(roomName, currentCompound.compound, currentCompound.amount);
-                }
-                return {
-                    ingredientMade: ingredientMade,
-                    mineralPurchased: mineralPurchased
-                }
+                    return ingredientMade;
+                } else
+                    return false;
+
+
             };
 
         Object.keys(global.COMPOUNDS_TO_MAKE).forEach(compound => {
 
-            if (global.COMPOUNDS_TO_MAKE[compound].make && !roomFound.ingredientMade && (this.name.indexOf(global.COMPOUNDS_TO_MAKE[compound].rooms) > -1 || global.COMPOUNDS_TO_MAKE[compound].rooms.length === 0)) {
+            if (global.COMPOUNDS_TO_MAKE[compound].make && !roomFound && (this.name.indexOf(global.COMPOUNDS_TO_MAKE[compound].rooms) > -1 || global.COMPOUNDS_TO_MAKE[compound].rooms.length === 0)) {
 
                 let storedResources = (this.resourcesAll[compound] || 0);
 
                 if (storedResources === 0) {
                     amountToMake = global.roundUpTo(global.COMPOUNDS_TO_MAKE[compound].amount + global.COMPOUNDS_TO_MAKE[compound].threshold, global.MIN_OFFER_AMOUNT);
                     roomFound = makeCompound(this.name, compound, amountToMake);
-                    if (roomFound.ingredientMade && global.DEBUG)
+                    if (roomFound && global.DEBUG)
                         global.logSystem(this.name, `there is no ${compound}, so start to make the compounds for ${global.COMPOUNDS_TO_MAKE[compound].amount} ${compound} in ${this.name}`);
                 } else if (storedResources <= global.COMPOUNDS_TO_MAKE[compound].threshold) {
                     amountToMake = global.roundUpTo(global.COMPOUNDS_TO_MAKE[compound].amount + global.COMPOUNDS_TO_MAKE[compound].threshold - storedResources, global.MIN_OFFER_AMOUNT);
                     roomFound = makeCompound(this.name, compound, amountToMake);
-                    if (roomFound.ingredientMade && global.DEBUG)
+                    if (roomFound && global.DEBUG)
                         global.logSystem(this.name, `it is below the threshold, so start to make the compounds for ${amountToMake} ${compound} in ${this.name}`);
                 }
             }
         });
 
-        return roomFound.ingredientMade || roomFound.mineralPurchased;
+        return roomFound;
 
     };
     Room.prototype.storedMinerals = function (mineral) {
@@ -1669,7 +1694,7 @@ mod.extend = function(){
             allLabsProducedAmountPerTick = producedAmountPerTick * numberOfSlaveLabs / reactionCoolDown,
             amount = data.reactions.orders[0].amount;
 
-        boostTiming.checkRoomAt = boostTiming.reactionMaking + global.roundUpTo(amount / allLabsProducedAmountPerTick, reactionCoolDown) + reactionCoolDown;
+        boostTiming.checkRoomAt = boostTiming.reactionMaking + global.roundUpTo(amount / allLabsProducedAmountPerTick, reactionCoolDown) + 1;
     };
     Room.prototype.getSeedLabOrders = function () {
 
