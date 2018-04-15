@@ -49,6 +49,17 @@ action.findNeeding = function(room, resourceType, amountMin, structureId){
             }
         }
     }
+	const nukers = room.structures.nukers.all;
+	if (nukers.length > 0) {
+		for (let i = 0; i < nukers.length; i++) {
+			const nuker = Game.getObjectById(nukers[i].id);
+			let amount = 0;
+			if (powerSpawn) amount = nukers.getNeeds(resourceType);
+			if (amount >= amountMin && (resourceType == RESOURCE_GHODIUM || resourceType == RESOURCE_ENERGY) && nukers.id != structureId) {
+				return { structure: nuker, amount: amount};
+			}
+		}
+	}
     const containers = room.structures.container.all;
     if (containers.length > 0) {
         for (let i = 0; i < containers.length; i++) {
@@ -196,6 +207,61 @@ action.newTargetLab = function(creep) {
         }
     }
     return null;
+};
+action.newTargetNuker = function(creep) {
+	const room = creep.room;
+	const nukers = room.structures.nukers.all;
+	// check powerSpawns for needs and make sure to empty the powerSpawn before filling
+	if (nukers.length > 0) {
+		for (var i = 0; i < nukers.length; i++) {
+			const nuker = Game.getObjectById(nukers[i].id);
+			if (!nuker) continue;
+			var amount = 0;
+			amount = nuker.getNeeds(RESOURCE_ENERGY);
+			if (amount > 0) {
+				// powerSpawn needs energy so find a lower priority container with some
+				if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, structureId: nuker.id, resourceType: RESOURCE_ENERGY, needs: amount });
+				if (room.storage && room.storage.active && room.storage.charge > 0.5) {
+					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: room.storage.id, resourceType: RESOURCE_ENERGY, targetNeeds: room.storage.store[RESOURCE_ENERGY] });
+					creep.data.reallocating = RESOURCE_ENERGY;
+					return room.storage;
+				}
+				if (room.terminal && room.terminal.active && room.terminal.getNeeds(RESOURCE_ENERGY) < 0) {
+					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: room.terminal.id, resourceType: RESOURCE_ENERGY, targetNeeds: room.terminal.store[RESOURCE_ENERGY] });
+					creep.data.reallocating = RESOURCE_ENERGY;
+					return room.terminal;
+				}
+				let ret = room.findContainerWith(RESOURCE_ENERGY);
+				if (ret) {
+					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: ret.structure.id, resourceType: RESOURCE_ENERGY, targetNeeds: ret.amount });
+					creep.data.reallocating = RESOURCE_ENERGY;
+					return ret.structure;
+				}
+			}
+			amount = nuker.getNeeds(RESOURCE_GHODIUM);
+			if (amount > 0) {
+				// powerSpawn needs energy so find a lower priority container with some
+				if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, structureId: nuker.id, resourceType: RESOURCE_POWER, needs: amount });
+				if (room.storage && room.storage.active && room.storage.store[RESOURCE_GHODIUM]) {
+					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: room.storage.id, resourceType: RESOURCE_GHODIUM, targetNeeds: room.storage.store[RESOURCE_GHODIUM] });
+					creep.data.reallocating = RESOURCE_GHODIUM;
+					return room.storage;
+				}
+				if (room.terminal && room.terminal.active && room.terminal.getNeeds(RESOURCE_POWER) < 0) {
+					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: room.terminal.id, resourceType: RESOURCE_GHODIUM, targetNeeds: room.terminal.store[RESOURCE_GHODIUM] });
+					creep.data.reallocating = RESOURCE_GHODIUM;
+					return room.terminal;
+				}
+				let ret = room.findContainerWith(RESOURCE_GHODIUM);
+				if (ret) {
+					if (DEBUG && TRACE) trace('Action', { actionName: 'reallocating', roomName: room.name, creepName: creep.name, targetStructureId: ret.structure.id, resourceType: RESOURCE_GHODIUM, targetNeeds: ret.amount });
+					creep.data.reallocating = RESOURCE_GHODIUM;
+					return ret.structure;
+				}
+			}
+		}
+	}
+	return null;
 };
 action.newTargetPowerSpawn = function(creep) {
     const room = creep.room;
@@ -393,6 +459,7 @@ action.newTarget = function(creep){
         if (data) {
             target = this.newTargetLab(creep);
             if (target === null) target = this.newTargetPowerSpawn(creep);
+	          if (target === null) target = this.newTargetNuker(creep);
             if (target === null) target = this.newTargetContainer(creep);
             if (target === null) target = this.newTargetTerminal(creep);
             if (target === null) target = this.newTargetStorage(creep);
