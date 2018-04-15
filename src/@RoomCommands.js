@@ -33,5 +33,5 @@ Game.rooms['E8N45'].setStore('5acd81cf6bec176d808b6418', RESOURCE_ENERGY, 5000);
 Game.rooms['E8N45'].setStore('5acd81cf6bec176d808b6418', 'power', 100);
 Game.rooms['E8N45'].setStore('5acda9bb4b207930933aa1c7', RESOURCE_ENERGY, 300000);
 Game.rooms['E8N45'].setStore('5acda9bb4b207930933aa1c7', RESOURCE_GHODIUM, 5000);
-
+delete Memory.rooms['E8N45'].resources.nuker
 
