@@ -53,6 +53,14 @@ mod.extend = function() {
                                         amount = cont.energy;
                                     }
                                     break;
+	                              case STRUCTURE_POWER_SPAWN:
+		                                // get power spawn amount
+		                                if (order.type == RESOURCE_GHODIUM) {
+			                                  amount = cont.ghodium;
+		                                } else if (order.type == RESOURCE_ENERGY) {
+			                                  amount = cont.energy;
+		                                }
+		                            break;
                                 default:
                                     // get stored amount
                                     amount = cont.store[order.type] || 0;
@@ -107,6 +115,7 @@ mod.extend = function() {
                             terminal: [],
                             storage: [],
                             powerSpawn: [],
+                            nuker: []
                         };
                     }
                     if (!room.memory.resources.offers)
@@ -248,6 +257,7 @@ mod.extend = function() {
             this.memory.resources = {
                 lab: [],
                 powerSpawn: [],
+                nuker: [],
                 container: [],
                 terminal: [],
                 nuker: [],
@@ -309,6 +319,7 @@ mod.extend = function() {
                 this.memory.resources = {
                     lab: [],
                     powerSpawn: [],
+                    nuker: [],
                     container: [],
                     terminal: [],
                     storage: []
@@ -408,6 +419,7 @@ mod.extend = function() {
             };
         }
         if (this.memory.resources.powerSpawn === undefined) this.memory.resources.powerSpawn = [];
+	      if (this.memory.resources.nuker === undefined) this.memory.resources.nuker = [];
         if (this.memory.resources.orders === undefined) {
             this.memory.resources.orders = [];
         }
@@ -447,6 +459,7 @@ mod.extend = function() {
             };
         }
         if (this.memory.resources.powerSpawn === undefined) this.memory.resources.powerSpawn = [];
+	      if (this.memory.resources.nuker === undefined) this.memory.resources.nuker = [];
         if (this.memory.resources.orders === undefined) {
             this.memory.resources.orders = [];
         }
