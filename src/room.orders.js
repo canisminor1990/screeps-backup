@@ -53,7 +53,7 @@ mod.extend = function() {
                                         amount = cont.energy;
                                     }
                                     break;
-	                              case STRUCTURE_POWER_SPAWN:
+	                              case STRUCTURE_NUKER:
 		                                // get power spawn amount
 		                                if (order.type == RESOURCE_GHODIUM) {
 			                                  amount = cont.ghodium;
